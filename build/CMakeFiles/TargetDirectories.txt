@@ -1,0 +1,3 @@
+/home/santtu/drone/build/CMakeFiles/drone_sim.dir
+/home/santtu/drone/build/CMakeFiles/edit_cache.dir
+/home/santtu/drone/build/CMakeFiles/rebuild_cache.dir
