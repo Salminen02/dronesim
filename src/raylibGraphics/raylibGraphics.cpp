@@ -2,6 +2,9 @@
 #include "iostream"
 #include "rlgl.h"
 
+#define RAYGUI_IMPLEMENTATION
+#include "../../raylib/examples/core/raygui.h"
+
 RaylibGraphics::RaylibGraphics(SimThread* _simThread) 
     : simThread(_simThread)
 {
@@ -74,7 +77,24 @@ void drawDrone(Eigen::Vector3f position, Eigen::Quaternionf orientation ){
     for (int i = 0; i < 4; i++) {
         Vector3 rp = toRaylib(offsets[i]);
         DrawLine3D({0, 0, 0}, rp, propellerColors[i]);
-        DrawSphere(rp, 0.06f, propellerColors[i]);
+
+        // Pyörivät terät - kulma kasvaa ajan myötä, eri propelleilla vaihe-ero
+        float angle = (float)GetTime() * 720.0f + i * 90.0f;
+        float rad = angle * DEG2RAD;
+        float bl = 0.13f;
+        float cx = cosf(rad) * bl, cz = sinf(rad) * bl;
+        float cx2 = cosf(rad + (float)M_PI * 0.5f) * bl;
+        float cz2 = sinf(rad + (float)M_PI * 0.5f) * bl;
+
+        // Terät (2 viivaa, 4 kärkeä)
+        DrawLine3D({rp.x + cx,  rp.y, rp.z + cz},  {rp.x - cx,  rp.y, rp.z - cz},  propellerColors[i]);
+        DrawLine3D({rp.x + cx2, rp.y, rp.z + cz2}, {rp.x - cx2, rp.y, rp.z - cz2}, propellerColors[i]);
+
+        // Sumennusympyrä propellin alle
+        DrawCircle3D(rp, bl, {0, 1, 0}, 0, Fade(propellerColors[i], 0.35f));
+
+        // Napa
+        DrawSphere(rp, 0.025f, DARKGRAY);
     }
 
     rlPopMatrix();
@@ -112,7 +132,70 @@ void RaylibGraphics::cast()
         drawDrone(dronePos, orientation);
    }
 
+    // Draw goal position marker
+    {
+        Vector3f goal = simThread->getGoal();
+        //Eigen::Quaternionf q_offset(Eigen::AngleAxisf(M_PI / 4.0f, Eigen::Vector3f::UnitZ()));
+        Vector3f goal2 = goal;
+        Vector3 goalRaylib = toRaylib(goal2);
+        DrawSphereWires(goalRaylib, 0.3f, 6, 6, YELLOW);
+        float s = 0.6f;
+        DrawLine3D({goalRaylib.x - s, goalRaylib.y, goalRaylib.z}, {goalRaylib.x + s, goalRaylib.y, goalRaylib.z}, YELLOW);
+        DrawLine3D({goalRaylib.x, goalRaylib.y - s, goalRaylib.z}, {goalRaylib.x, goalRaylib.y + s, goalRaylib.z}, YELLOW);
+        DrawLine3D({goalRaylib.x, goalRaylib.y, goalRaylib.z - s}, {goalRaylib.x, goalRaylib.y, goalRaylib.z + s}, YELLOW);
+    }
+
     EndMode3D();
+
+    // Draw UI controls
+    Controller* controller = simThread->getController();
+    if (controller) {
+        Vector3f goal = simThread->getGoal();
+        float goalX = goal.x();
+        float goalY = goal.y();
+        float goalZ = goal.z();
+
+        // ---- 2D joystick for XY goal ----
+        const int stickCx = 90;
+        const int stickCy = 230;
+        const int stickR  = 70;   // outer radius
+        const float xyRange = 10.0f;
+
+        DrawCircle(stickCx, stickCy, stickR, Fade(LIGHTGRAY, 0.8f));
+        DrawCircleLines(stickCx, stickCy, stickR, DARKGRAY);
+        // crosshair
+        DrawLine(stickCx - stickR, stickCy, stickCx + stickR, stickCy, GRAY);
+        DrawLine(stickCx, stickCy - stickR, stickCx, stickCy + stickR, GRAY);
+        GuiLabel((Rectangle){stickCx - stickR, stickCy + stickR + 4, stickR*2, 16}, "XY Goal (drag)");
+
+        // Thumb position mapped from goal
+        int thumbX = stickCx + (int)(goalX / xyRange * stickR);
+        int thumbY = stickCy - (int)(goalY / xyRange * stickR); // Y axel: upp = positiv
+        thumbX = std::max(stickCx - stickR, std::min(stickCx + stickR, thumbX));
+        thumbY = std::max(stickCy - stickR, std::min(stickCy + stickR, thumbY));
+        DrawCircle(thumbX, thumbY, 14, Fade(DARKBLUE, 0.85f));
+        DrawCircleLines(thumbX, thumbY, 14, BLUE);
+
+        // Drag interaction
+        Vector2 mouse = GetMousePosition();
+        float dx = mouse.x - stickCx;
+        float dy = mouse.y - stickCy;
+        float dist = sqrtf(dx*dx + dy*dy);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && dist <= stickR) {
+            float nx = std::max(-1.0f, std::min(1.0f, dx / stickR));
+            float ny = std::max(-1.0f, std::min(1.0f, -dy / stickR));
+            goalX = nx * xyRange;
+            goalY = ny * xyRange;
+        }
+
+        // ---- Z slider ----
+        GuiGroupBox((Rectangle){ 10, 310, 160, 60 }, "Goal Z");
+        GuiSlider((Rectangle){ 20, 330, 140, 20 }, "0", "20", &goalZ, 0.0f, 20.0f);
+
+        DrawText(TextFormat("X:%.1f  Y:%.1f  Z:%.1f", goalX, goalY, goalZ), 10, 380, 16, DARKGRAY);
+
+        simThread->setGoal(Vector3f{goalX, goalY, goalZ});
+    }
 
     EndDrawing();
 }

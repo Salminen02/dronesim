@@ -10,7 +10,9 @@ void Sim::updateSimulation(float dt)
 {
     for (auto& droneWhole : droneWholes){
             droneWhole->hardDrone->move(dt);
-            droneWhole->controller->control(dt);
+            //droneWhole->controller->control(dt);
+            droneWhole->controller->controlLQR(dt);
+            droneWhole->controller->setGoalX(droneGoalxyz);
     }
     updateTime(dt);
 }
@@ -40,7 +42,11 @@ void Sim::startSimulation()
 {
     auto droneWhole = std::make_unique<DroneWhole>();
     auto hardDrone = std::make_unique<HardDrone>();
-    auto controller = std::make_unique<Controller>(hardDrone.get());
+
+    Eigen::Vector4d r2 = r.array();
+    Eigen::VectorXd q2 = q.array() + count * (Eigen::ArrayXd(12) << 0, 0.13, 0, 0.13, 0, 0.13, 0, 0, 0, 0, 0, 0).finished();
+    count++;
+    auto controller = std::make_unique<Controller>(hardDrone.get(), q2, r2);
     controller->setControllerDevice(controllerDevice);
     droneWhole->hardDrone = std::move(hardDrone);
     droneWhole->controller = std::move(controller);

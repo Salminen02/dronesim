@@ -52,14 +52,28 @@ class Sim{
 
   void updateTime(float dt);
 
+  void setGoal(Vector3f xyz){droneGoalxyz = xyz;};
+
+  Vector3f getGoal() const { return droneGoalxyz; };
+  
+  // Get controller for UI access
+  Controller* getController() const {
+    if (!droneWholes.empty() && droneWholes[0]) {
+      return droneWholes[0]->controller.get();
+    }
+    return nullptr;
+  }
+
 
  private:
     // Congig
   std::vector<std::unique_ptr<DroneWhole>> droneWholes{};
-
+  Eigen::VectorXd q = (Eigen::VectorXd(12) << 2, 3, 2, 3, 2, 3, 2, 2, 2, 2, 2, 2).finished();
+  Eigen::Vector4d r{0.04, 0.04, 0.04, 0.04};
   bool paused = false;
   bool ranOnce = false;
   ControllerDevice* controllerDevice = nullptr;
-
+  Eigen::Vector3f droneGoalxyz{0,0,0};
   Time time;  
+  float count = 0;
 };

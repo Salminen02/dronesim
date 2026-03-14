@@ -2182,6 +2182,7 @@ CMakeFiles/drone_sim.dir/src/raylibGraphics/raylibGraphics.cpp.o
  /usr/local/include/raymath.h
  /usr/include/c++/11/math.h
  /usr/local/include/rlgl.h
+ /home/santtu/drone/raylib/examples/core/raygui.h
 
 CMakeFiles/drone_sim.dir/src/simulation/sim.cpp.o
  /home/santtu/drone/src/simulation/sim.cpp

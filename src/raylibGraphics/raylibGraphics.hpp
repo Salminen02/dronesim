@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
+
 class RaylibGraphics{
  public:
    RaylibGraphics(SimThread* simThread);

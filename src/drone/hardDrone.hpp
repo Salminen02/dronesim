@@ -3,6 +3,7 @@
 #include <Eigen/Geometry>
 #include <utility>
 #include <iostream>
+#include <cmath>
 
 using Eigen::Vector3f;
 
@@ -49,6 +50,9 @@ class HardDrone{
     Vector3f getAngularVelocityLocal() {
         return orientationQ.inverse() * angularVel;  // Quaternion * Vector3f
     }
+    Vector3f getAngularVelocityWorld(){
+        return angularVel;
+    }
 
             //  BL     BR     Fl     FR
     std::tuple<float, float, float, float> getPropellerRPSController();
@@ -69,8 +73,16 @@ class HardDrone{
     float getPropellerD4() const;
     float getCt() const {return BLPropeller.Ct;};
 
-    Vector3f getVel() { return vel;};
+    Vector3f getAngularAcc() const { return angularAcc; };
 
+    Vector3f getVel() { return vel; };
+
+    float getR() {return std::sqrt(BLPropeller.coord.x()*BLPropeller.coord.x() + BLPropeller.coord.y()*BLPropeller.coord.y());};
+
+    float getCq() { return BLPropeller.Cq; };
+    float getCt() { return BLPropeller.Ct; };
+    float getD() { return BLPropeller.D; };
+    float getI() { return angularInertia; };
  private:
     float squarePropellerDrone = 0.3f;  // MÄÄRITTELE ENNEN propellereitä!
     

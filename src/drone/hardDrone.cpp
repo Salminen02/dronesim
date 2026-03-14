@@ -21,10 +21,7 @@ HardDrone::HardDrone()
     // BL(-X,-Y)  BR(+X,-Y)
     //
 {
-    Eigen::AngleAxisf rollAA(0, Eigen::Vector3f::UnitX());
-    Eigen::AngleAxisf pitchAA(0, Eigen::Vector3f::UnitY());
-    Eigen::AngleAxisf yawAA(0, Eigen::Vector3f::UnitZ());
-    orientationQ = yawAA * pitchAA * rollAA;
+    setOrientation(M_PI*4/3, 0, 0);
     
     FRPropeller.RPS = 0;
     FLPropeller.RPS = 0;

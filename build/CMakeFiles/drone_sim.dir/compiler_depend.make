@@ -2176,7 +2176,8 @@ CMakeFiles/drone_sim.dir/src/raylibGraphics/raylibGraphics.cpp.o: ../src/raylibG
   /usr/local/include/raylib.h \
   /usr/local/include/raymath.h \
   /usr/include/c++/11/math.h \
-  /usr/local/include/rlgl.h
+  /usr/local/include/rlgl.h \
+  ../raylib/examples/core/raygui.h
 
 CMakeFiles/drone_sim.dir/src/simulation/sim.cpp.o: ../src/simulation/sim.cpp \
   /usr/include/stdc-predef.h \
@@ -3139,6 +3140,8 @@ CMakeFiles/drone_sim.dir/src/simulation/simThread.cpp.o: ../src/simulation/simTh
   /usr/include/c++/11/bits/std_mutex.h \
   /usr/include/c++/11/bits/unique_lock.h
 
+
+../raylib/examples/core/raygui.h:
 
 /usr/local/include/rlgl.h:
 

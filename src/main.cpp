@@ -26,7 +26,6 @@ using Eigen::Matrix3d;
 int main(void)
 {
     feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
-    
     // Luo simulaatio ja thread
     std::unique_ptr<Sim> sim1 = std::make_unique<Sim>();
     // Luo ControllerDevice
